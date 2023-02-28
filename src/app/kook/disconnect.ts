@@ -1,5 +1,5 @@
 import { BaseCommand, BaseSession, CommandFunction } from "kasumi.js";
-import { disconnect as remove } from "../common";
+import { channel } from "../common";
 
 class Disconnect extends BaseCommand {
     name = 'disconnect';
@@ -8,7 +8,7 @@ class Disconnect extends BaseCommand {
     func: CommandFunction<BaseSession, any> = async (session) => {
         if (session.args.length) {
             let channelId = session.args[0];
-            await remove('kook', channelId);
+            channel.disconnect.kook(channelId);
             return session.reply('解除成功!');
         }
     }

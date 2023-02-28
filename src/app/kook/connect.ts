@@ -1,7 +1,7 @@
 import { Routes } from "discord.js";
 import { BaseCommand, BaseSession, CommandFunction } from "kasumi.js";
 import { rest as discord } from "../../init/discord";
-import { connect as cnct } from "../common";
+import { channel } from "../common";
 
 class Connect extends BaseCommand {
     name = 'connect';
@@ -11,7 +11,7 @@ class Connect extends BaseCommand {
         if (session.args.length) {
             let channelId = session.args[0];
             if (await discord.get(Routes.channel(channelId)).catch(e => false)) {
-                await cnct(session.channelId, channelId);
+                channel.connect(session.channelId, channelId);
                 return session.reply('连接成功!');
             } else return session.reply('频道不存在！');
         } else return session.reply('请输入一个频道');

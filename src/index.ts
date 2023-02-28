@@ -5,5 +5,5 @@ import { client as kook } from './init/kook';
 import './app/discord';
 import './app/kook';
 
-discord.login(config.discordToken);
+discord.login(config.discord.token);
 kook.connect();

@@ -1,18 +1,33 @@
+import config from "../../config/config";
 import { Card } from "kasumi.js";
 import { MessageType } from "kasumi.js/dist/type";
 import { client, logger } from "../../init/discord";
 import { client as kook } from '../../init/kook';
-import { getConnectedChannel } from "../common";
+import { channel, message as msg } from "../common";
 
 import './connect';
 import './disconnect';
 
+client.on('messageDelete', async (message) => {
+    let messageId;
+    if (messageId = msg.getConnected.discord(message.id)) {
+        // console.log(messageId.msg);
+        kook.API.message.delete(messageId.msg).catch((e) => {
+            // kook.logger.warn(e);
+        })
+        msg.disconnect.discord(messageId.msg);
+    }
+    // kook.logger.info(messageId);
+})
+
 client.on('messageCreate', async (message) => {
+    if (config.discord.allowedUserList.length && !(config.discord.allowedUserList as Array<string>).includes(message.author.id)) return;
+
     if (message.author.id == client.user?.id) return;
     // console.log(message.content);
     let channelId: string | undefined;
-    if (channelId = getConnectedChannel.discord(message.channelId)) {
-        console.dir(message, { depth: null });
+    if (channelId = channel.getConnected.discord(message.channelId)) {
+        // console.dir(message, { depth: null });
         if (message.content) kook.API.message.create(MessageType.MarkdownMessage, channelId, message
             .content
             .replace(/(\x9B|\x1B\[)[0-?]*[ -\/]*[@-~]/gm, '')
@@ -22,7 +37,14 @@ client.on('messageCreate', async (message) => {
             .replace(/__([\S]+?)__/gm, '(ins)$1(ins)')
             .replace(/\|\|([\S]+?)\|\|/gm, '(spl)$1(spl)')
             .replace(/_([\S]+?)_/gm, '*$1*')
-        );
+        ).then((res) => {
+            if (channelId)
+                msg.connect({ msg: res.msg_id, channel: channelId }, { msg: message.id, channel: message.channelId });
+        }).catch((e) => {
+            // console.dir(card.toObject(), { depth: null });
+            logger.warn('Send message failed');
+            logger.warn(e);
+        })
         const card = new Card()
             .setTheme('info')
             .setSize('lg')
@@ -49,10 +71,15 @@ client.on('messageCreate', async (message) => {
             }
         }
         // console.log(channelId);
-        if (flg) kook.API.message.create(MessageType.CardMessage, channelId, JSON.stringify([card.toObject()])).catch((e) => {
-            console.dir(card.toObject(), { depth: null });
-            logger.warn('Send message failed');
-            logger.warn(e);
-        })
+        if (flg) await kook.API.message.create(MessageType.CardMessage, channelId, JSON.stringify([card.toObject()]))
+            .then((res) => {
+                if (channelId)
+                    msg.connect({ msg: res.msg_id, channel: channelId }, { msg: message.id, channel: message.channelId });
+            })
+            .catch((e) => {
+                // console.dir(card.toObject(), { depth: null });
+                logger.warn('Send message failed');
+                logger.warn(e);
+            })
     }
 })

@@ -51,9 +51,9 @@ const commands = [
     }
 ];
 
-export const rest = new REST({ version: '10' }).setToken(config.discordToken);
+export const rest = new REST({ version: '10' }).setToken(config.discord.token);
 (async () => {
-    await rest.put(Routes.applicationCommands(config.discordApplicationId), { body: commands }).catch((e) => {
+    await rest.put(Routes.applicationCommands(config.discord.applicaitonId), { body: commands }).catch((e) => {
         logger.warn('Failed to update command list');
         logger.warn(e);
     })

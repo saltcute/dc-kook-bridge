@@ -3,5 +3,5 @@ import config from '../config/config';
 
 export const client = new Kasumi({
     type: 'websocket',
-    token: config.kookToken
+    token: config.kook.token
 })

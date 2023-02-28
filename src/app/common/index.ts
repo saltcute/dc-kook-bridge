@@ -43,39 +43,70 @@ class Storage<T, K> {
     }
 }
 
-const d2k = new Storage<string, string>("d2k").save();
-const k2d = new Storage<string, string>("k2d").save();
-
-export async function connect(kookChannelId: string, discordChannelId: string) {
-    k2d.set(kookChannelId, discordChannelId);
-    d2k.set(discordChannelId, kookChannelId);
-}
-export async function disconnect(type: 'kook' | 'discord', channelId: string) {
-    if (type == 'kook') {
-        let discordChannelId = k2d.get(channelId);
-        if (discordChannelId) d2k.delete(discordChannelId);
-        k2d.delete(channelId);
-    } else {
-        let kookChannelId = d2k.get(channelId);
-        if (kookChannelId) k2d.delete(kookChannelId);
-        d2k.delete(channelId);
+class Connection<T, K> {
+    name: string;
+    d2k: Storage<T, K>;
+    k2d: Storage<T, K>;
+    constructor(name: string) {
+        this.name = name;
+        this.d2k = new Storage<T, K>(`${name}.d2k`).save();
+        this.k2d = new Storage<T, K>(`${name}.k2d`).save();
+    }
+    isRegistered = {
+        kook: (keyword: T) => {
+            return this.k2d.keys().includes(keyword);
+        },
+        discord: (keyword: T) => {
+            return this.d2k.keys().includes(keyword);
+        }
+    }
+    getConnected = {
+        kook: (keyword: T) => {
+            return this.k2d.get(keyword);
+        },
+        discord: (keyword: T) => {
+            return this.d2k.get(keyword);
+        }
     }
 }
 
-export const isRegistered = {
-    kook(channelId: string) {
-        return k2d.keys().includes(channelId);
-    },
-    discord(channelId: string) {
-        return d2k.keys().includes(channelId);
+class Channel extends Connection<string, string> {
+    connect(kook: string, discord: string) {
+        this.k2d.set(kook, discord);
+        this.d2k.set(discord, kook);
+    }
+    disconnect = {
+        kook: (keyword: string) => {
+            let discord = this.k2d.get(keyword);
+            if (discord) this.d2k.delete(discord);
+            this.k2d.delete(keyword);
+        },
+        discord: (keyword: string) => {
+            let kook = this.d2k.get(keyword);
+            if (kook) this.k2d.delete(kook);
+            this.d2k.delete(keyword);
+        }
     }
 }
 
-export const getConnectedChannel = {
-    kook(channelId: string) {
-        return k2d.get(channelId);
-    },
-    discord(channelId: string) {
-        return d2k.get(channelId);
+class Message extends Connection<string, { msg: string, channel: string }> {
+    connect(kook: { msg: string, channel: string }, discord: { msg: string, channel: string }) {
+        this.k2d.set(kook.msg, discord);
+        this.d2k.set(discord.msg, kook);
+    }
+    disconnect = {
+        kook: (keyword: string) => {
+            let discord = this.k2d.get(keyword);
+            if (discord) this.d2k.delete(discord.msg);
+            this.k2d.delete(keyword);
+        },
+        discord: (keyword: string) => {
+            let kook = this.d2k.get(keyword);
+            if (kook) this.k2d.delete(kook.msg);
+            this.d2k.delete(keyword);
+        }
     }
 }
+
+export const channel = new Channel('channel')
+export const message = new Message('message');
