@@ -23,7 +23,7 @@ client.message.on('systemMessages', (event) => {
 client.message.on('allTextMessages', (event) => {
     if (config.kook.allowedUserList.length && !(config.kook.allowedUserList as Array<string>).includes(event.authorId)) return;
     let channelId: string | undefined;
-    if ((channelId = channel.getConnected.kook(event.channelId)) && event.content.startsWith('!')) {
+    if ((channelId = channel.getConnected.kook(event.channelId))) {
         rest.post(Routes.channelMessages(channelId), {
             body: {
                 content: event.content
