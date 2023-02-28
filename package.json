@@ -1,0 +1,22 @@
+{
+  "dependencies": {
+    "bunyan": "^1.8.15",
+    "discord.js": "^14.7.1",
+    "kasumi.js": "^0.1.6",
+    "ts-node": "^10.9.1",
+    "tsconfig-paths": "^3.14.2",
+    "upath": "^2.0.1"
+  },
+  "devDependencies": {
+    "@types/bunyan": "^1.8.8"
+  },
+  "name": "dc-kook-brdige",
+  "version": "0.0.1",
+  "main": "dist/index.js",
+  "scripts": {
+    "start": "node --nolazy -r ts-node/register -r tsconfig-paths/register src/index.ts"
+  },
+  "author": "Hexona",
+  "license": "MIT",
+  "description": ""
+}
