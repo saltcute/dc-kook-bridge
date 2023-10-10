@@ -1,6 +1,6 @@
 import config from "../../config/config";
 import { Card } from "kasumi.js";
-import { MessageType } from "kasumi.js/dist/type";
+import { MessageType } from "kasumi.js";
 import { client, logger } from "../../init/discord";
 import { client as kook } from '../../init/kook';
 import { channel, message as msg } from "../common";
@@ -38,8 +38,9 @@ client.on('messageCreate', async (message) => {
             .replace(/\|\|([\S]+?)\|\|/gm, '(spl)$1(spl)')
             .replace(/_([\S]+?)_/gm, '*$1*')
         ).then((res) => {
-            if (channelId && res)
-                msg.connect({ msg: res.msg_id, channel: channelId }, { msg: message.id, channel: message.channelId });
+            const { data, err } = res;
+            if (channelId && data)
+                msg.connect({ msg: data.msg_id, channel: channelId }, { msg: message.id, channel: message.channelId });
         }).catch((e) => {
             // console.dir(card.toObject(), { depth: null });
             logger.warn('Send message failed');
@@ -73,8 +74,9 @@ client.on('messageCreate', async (message) => {
         // console.log(channelId);
         if (flg) await kook.API.message.create(MessageType.CardMessage, channelId, JSON.stringify([card.toObject()]))
             .then((res) => {
-                if (channelId && res)
-                    msg.connect({ msg: res.msg_id, channel: channelId }, { msg: message.id, channel: message.channelId });
+                const { data, err } = res;
+                if (channelId && data)
+                    msg.connect({ msg: data.msg_id, channel: channelId }, { msg: message.id, channel: message.channelId });
             })
             .catch((e) => {
                 // console.dir(card.toObject(), { depth: null });
